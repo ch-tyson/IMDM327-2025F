@@ -11,7 +11,7 @@ public class ThreeBody : MonoBehaviour
     private const float G = 500f; // Gravity constant https://en.wikipedia.org/wiki/Gravitational_constant
     GameObject[] body;
     BodyProperty[] bp;
-    private int numberOfSphere = 3;
+    private int numberOfSphere = 100;
     TrailRenderer trailRenderer;
     struct BodyProperty // why struct?
     {                   // https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/choosing-between-class-and-struct
@@ -39,11 +39,11 @@ public class ThreeBody : MonoBehaviour
             // position is (x,y,z). In this case, I want to plot them on the circle with r
 
             // ******** Fill in this part ********
-            // body[i].transform.position = new Vector3( ***, *** , 180);
+            body[i].transform.position = new Vector3( Random.Range(-250f, 250f), Random.Range(-100f, 100f), 180);
             // z = 180 to see this happen in front of me. Try something else (randomize) too.
 
-            bp[i].velocity = new Vector3(0,0,0); // Try different initial condition
-            bp[i].mass = 1; // Simplified. Try different initial condition
+            bp[i].velocity = new Vector3(0, 0, 0); // Try different initial condition
+            bp[i].mass = 1.0f; // Simplified. Try different initial condition
 
 
             // + This is just pretty trails
@@ -71,7 +71,23 @@ public class ThreeBody : MonoBehaviour
         // How should we design the loop?
         for (int i = 0; i < numberOfSphere; i++)
         {
-            // Something
+            bp[i].acceleration = Vector3.zero;
+
+            for (int j = 0; j < numberOfSphere; j++)
+            {
+                if (i != j)
+                {
+                    Vector3 distanceVector = body[j].transform.position - body[i].transform.position;
+                    Vector3 gravityForce = CalculateGravity(distanceVector, bp[i].mass, bp[j].mass);
+
+                    // since F = ma, so a = F/m
+                    bp[i].acceleration += gravityForce / bp[i].mass;
+                }
+            }
+
+            // Update velocity and position using Euler integration
+            bp[i].velocity += bp[i].acceleration * Time.deltaTime;
+            body[i].transform.position += bp[i].velocity * Time.deltaTime;
         }
 
     }
@@ -79,9 +95,10 @@ public class ThreeBody : MonoBehaviour
     // Gravity Fuction to finish
     private Vector3 CalculateGravity(Vector3 distanceVector, float m1, float m2)
     {
-        Vector3 gravity = new Vector3(0f,0f,0f); // note this is also Vector3
-       // **** Fill in the function below. 
-        // gravity = ****;
+        Vector3 gravity = new Vector3(0f, 0f, 0f); // note this is also Vector3
+        // Force = G * (m1 * m2 / r^2 )                               
+        gravity = distanceVector.normalized * G * m1 * m2 / (distanceVector.magnitude * distanceVector.magnitude);
+
         return gravity;
     }
 }
