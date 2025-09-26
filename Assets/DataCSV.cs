@@ -43,7 +43,7 @@ public class DataCSV : MonoBehaviour
                 float.TryParse(cols[5].Trim(), out float vel))
             {
                 // assignment into array
-                bp[i].mass = mass;
+                bp[i].mass = mass * 1e22f;
                 bp[i].distance = dist;
                 bp[i].initial_velocity = vel;
             }
